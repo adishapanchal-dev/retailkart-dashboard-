@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetailKart Executive Performance Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- TOP BANNER & GLOBAL FILTERS -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-600/20 text-indigo-400 rounded-lg border border-indigo-500/30">
+                        <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-white">RetailKart Executive Performance Dashboard</h1>
+                        <p class="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+                            <span>Data Source: RetailKart Orders (9,893 Filtered Orders)</span>
+                            <span class="inline-block w-1 h-1 rounded-full bg-slate-600"></span>
+                            <span class="text-indigo-400 font-medium">Last Refreshed: Oct 8, 2026</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTROLS & GLOBAL FILTERS -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div>
+                    <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-1">Timeframe</label>
+                    <select id="timeframeFilter" onchange="updateDashboard()" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">All Time (2024 - 2025)</option>
+                        <option value="2025">FY 2025</option>
+                        <option value="2024">FY 2024</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-1">Category</label>
+                    <select id="categoryFilter" onchange="updateDashboard()" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">All Categories</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Home & Furniture">Home & Furniture</option>
+                        <option value="Sports & Fitness">Sports & Fitness</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+                        <option value="Books & Stationery">Books & Stationery</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-1">Region</label>
+                    <select id="regionFilter" onchange="updateDashboard()" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">All Regions</option>
+                        <option value="West">West</option>
+                        <option value="North">North</option>
+                        <option value="South">South</option>
+                        <option value="East">East</option>
+                        <option value="Central">Central</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-1 space-y-8 w-full">
+
+        <!-- ROW 1: KPI CARDS -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- KPI 1 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all shadow-sm">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Net Revenue</span>
+                    <i data-lucide="indian-rupee" class="w-4 h-4 text-emerald-400"></i>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <div id="kpiRevenue" class="text-2xl font-bold text-white tracking-tight">₹8.18 Cr</div>
+                    <span id="kpiRevenueTrend" class="inline-flex items-center text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        +17.5% YoY
+                    </span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2">Delivered & Shipped orders (Excl. ₹1.30 Cr leakage)</p>
+            </div>
+
+            <!-- KPI 2 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all shadow-sm">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Net Profit</span>
+                    <i data-lucide="trending-up" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <div id="kpiProfit" class="text-2xl font-bold text-white tracking-tight">₹1.72 Cr</div>
+                    <span id="kpiProfitTrend" class="inline-flex items-center text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        +14.1% YoY
+                    </span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2">Product margin (Excl. ad & shipping costs)</p>
+            </div>
+
+            <!-- KPI 3 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all shadow-sm">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Profit Margin %</span>
+                    <i data-lucide="percent" class="w-4 h-4 text-amber-400"></i>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <div id="kpiMargin" class="text-2xl font-bold text-white tracking-tight">21.0%</div>
+                    <span id="kpiMarginTrend" class="inline-flex items-center text-xs font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                        -0.6 pts YoY
+                    </span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2">Held down by 15.3% margin on Electronics</p>
+            </div>
+
+            <!-- KPI 4 -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all shadow-sm">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Return Rate</span>
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-400"></i>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <div id="kpiReturnRate" class="text-2xl font-bold text-white tracking-tight">10.3%</div>
+                    <span id="kpiReturnTrend" class="inline-flex items-center text-xs font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+                        1,021 Orders
+                    </span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2">Led by Fashion (18.8%) & 40% Discounts (13.9%)</p>
+            </div>
+        </section>
+
+        <!-- ROW 2: MAIN VISUALS -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Container: Multi-Series Trend Chart -->
+            <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-base font-semibold text-white">Monthly Revenue & Profit Trajectory</h2>
+                        <p class="text-xs text-slate-400">Comparing monthly Net Sales against Gross Profit (2024 - 2025)</p>
+                    </div>
+                    <span class="text-xs text-indigo-400 font-medium bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">
+                        Peak: Nov 2025 (₹62.7 L)
+                    </span>
+                </div>
+                <div class="flex-1 min-h-[300px] relative">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Right Container: Categorical Breakdown Chart -->
+            <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-base font-semibold text-white">Category Revenue & Margin Split</h2>
+                        <p class="text-xs text-slate-400">Comparing volume drivers vs high-margin lines</p>
+                    </div>
+                </div>
+                <div class="flex-1 min-h-[300px] relative">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROW 3: DEEP DIVE TRANSACTIONAL TABLE -->
+        <section class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+                <div>
+                    <h2 class="text-base font-semibold text-white">Category & Segment Performance Breakdown</h2>
+                    <p class="text-xs text-slate-400">Detailed financial breakdown across major product categories and order fulfillment metrics</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-2.5"></i>
+                        <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Search segment or category..." class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-md pl-9 pr-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-800/60 text-slate-400 uppercase tracking-wider text-[10px]">
+                        <tr>
+                            <th class="py-3 px-4 font-semibold">Category / Segment</th>
+                            <th class="py-3 px-4 font-semibold text-right">Net Revenue</th>
+                            <th class="py-3 px-4 font-semibold text-right">Profit</th>
+                            <th class="py-3 px-4 font-semibold text-right">Margin %</th>
+                            <th class="py-3 px-4 font-semibold text-right">Return Rate</th>
+                            <th class="py-3 px-4 font-semibold text-center">Strategic Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-800">
+                        <!-- Populated dynamically by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800 bg-slate-900 px-6 py-4 text-center text-xs text-slate-500">
+        RetailKart BI & Analytics Workspace &bull; Built for Executive Leadership Review
+    </footer>
+
+    <!-- INTERACTIVE JAVASCRIPT LOGIC -->
+    <script>
+        lucide.createIcons();
+
+        // Dataset from Cleaned Insights Report
+        const categoryData = {
+            "all": [
+                { category: "Electronics", revenue: "₹4.87 Cr", profit: "₹74.5 L", margin: "15.3%", returnRate: "6.9%", priority: "Protect Volume / Supplier Costs", revNum: 487, marginNum: 15.3 },
+                { category: "Home & Furniture", revenue: "₹1.58 Cr", profit: "₹39.8 L", margin: "25.2%", returnRate: "8.8%", priority: "Expand Catalog", revNum: 158, marginNum: 25.2 },
+                { category: "Sports & Fitness", revenue: "₹69.1 L", profit: "₹16.7 L", margin: "24.2%", returnRate: "7.9%", priority: "Maintain Strategy", revNum: 69.1, marginNum: 24.2 },
+                { category: "Fashion", revenue: "₹55.8 L", profit: "₹20.8 L", margin: "37.2%", returnRate: "18.8%", priority: "Fix Fit & Size / Sourcing", revNum: 55.8, marginNum: 37.2 },
+                { category: "Beauty & Personal Care", revenue: "₹34.7 L", profit: "₹15.4 L", margin: "44.3%", returnRate: "8.9%", priority: "Scale Marketing Spend", revNum: 34.7, marginNum: 44.3 },
+                { category: "Books & Stationery", revenue: "₹13.1 L", profit: "₹4.56 L", margin: "34.8%", returnRate: "3.8%", priority: "Cross-Sell Bundles", revNum: 13.1, marginNum: 34.8 }
+            ],
+            "Electronics": [
+                { category: "Laptops Sub-Category", revenue: "₹3.10 Cr", profit: "₹38.6 L", margin: "12.5%", returnRate: "6.2%", priority: "Renegotiate Cost", revNum: 310, marginNum: 12.5 },
+                { category: "Smartphones Sub-Category", revenue: "₹1.38 Cr", profit: "₹22.3 L", margin: "16.1%", returnRate: "7.1%", priority: "Protect Volume", revNum: 138, marginNum: 16.1 }
+            ],
+            "Fashion": [
+                { category: "Sneakers & Footwear", revenue: "₹22.4 L", profit: "₹8.3 L", margin: "37.0%", returnRate: "22.9%", priority: "Audit Size Guide", revNum: 22.4, marginNum: 37.0 },
+                { category: "Printed Kurtis & Wear", revenue: "₹18.1 L", profit: "₹6.8 L", margin: "37.5%", returnRate: "22.8%", priority: "Quality Inspection", revNum: 18.1, marginNum: 37.5 }
+            ]
+        };
+
+        const trendDatasets = {
+            "all": {
+                labels: ["Q1 24", "Q2 24", "Q3 24", "Q4 24", "Q1 25", "Q2 25", "Q3 25", "Oct 25", "Nov 25", "Dec 25"],
+                revenue: [82, 75, 94, 125, 98, 89, 102, 45.7, 62.7, 54.2],
+                profit: [17.5, 15.8, 19.8, 27.1, 20.3, 18.2, 21.1, 9.6, 13.1, 11.2]
+            },
+            "2025": {
+                labels: ["Jan 25", "Feb 25", "Mar 25", "Apr 25", "May 25", "Jun 25", "Jul 25", "Aug 25", "Sep 25", "Oct 25", "Nov 25", "Dec 25"],
+                revenue: [32, 22, 28, 27, 31, 30, 33, 34, 35, 45.7, 62.7, 54.2],
+                profit: [6.7, 4.6, 5.8, 5.6, 6.4, 6.2, 6.8, 7.1, 7.2, 9.6, 13.1, 11.2]
+            },
+            "2024": {
+                labels: ["Q1 24", "Q2 24", "Q3 24", "Oct 24", "Nov 24", "Dec 24"],
+                revenue: [82, 75, 94, 38, 42, 45],
+                profit: [17.5, 15.8, 19.8, 8.1, 8.9, 10.1]
+            }
+        };
+
+        let trendChartObj = null;
+        let categoryChartObj = null;
+
+        function initCharts() {
+            // Trend Chart
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            trendChartObj = new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: trendDatasets["all"].labels,
+                    datasets: [
+                        {
+                            label: 'Net Revenue (₹ Lakhs)',
+                            data: trendDatasets["all"].revenue,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Net Profit (₹ Lakhs)',
+                            data: trendDatasets["all"].profit,
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [4, 4],
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { size: 11 } } },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // Category Chart
+            const ctxCat = document.getElementById('categoryChart').getContext('2d');
+            const catArr = categoryData["all"];
+            categoryChartObj = new Chart(ctxCat, {
+                type: 'bar',
+                data: {
+                    labels: catArr.map(d => d.category),
+                    datasets: [{
+                        label: 'Net Revenue (₹ Lakhs)',
+                        data: catArr.map(d => d.revNum),
+                        backgroundColor: ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Revenue: ₹${context.raw} L`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        function populateTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-medium text-slate-200">${item.category}</td>
+                    <td class="py-3 px-4 text-right font-semibold text-indigo-400">${item.revenue}</td>
+                    <td class="py-3 px-4 text-right font-semibold text-emerald-400">${item.profit}</td>
+                    <td class="py-3 px-4 text-right">${item.margin}</td>
+                    <td class="py-3 px-4 text-right text-rose-400 font-medium">${item.returnRate}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="inline-block bg-slate-800 border border-slate-700 text-slate-300 text-[10px] px-2.5 py-0.5 rounded-full">
+                            ${item.priority}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateDashboard() {
+            const timeVal = document.getElementById('timeframeFilter').value;
+            const catVal = document.getElementById('categoryFilter').value;
+
+            // Update Trend Chart Data
+            const tData = trendDatasets[timeVal] || trendDatasets["all"];
+            trendChartObj.data.labels = tData.labels;
+            trendChartObj.data.datasets[0].data = tData.revenue;
+            trendChartObj.data.datasets[1].data = tData.profit;
+            trendChartObj.update();
+
+            // Update Table Data
+            const selectedTableData = categoryData[catVal] || categoryData["all"];
+            populateTable(selectedTableData);
+
+            // Update KPI Cards Dynamic Simulation
+            if (timeVal === "2025") {
+                document.getElementById('kpiRevenue').innerText = "₹4.42 Cr";
+                document.getElementById('kpiProfit').innerText = "₹91.5 L";
+                document.getElementById('kpiMargin').innerText = "20.7%";
+            } else if (timeVal === "2024") {
+                document.getElementById('kpiRevenue').innerText = "₹3.76 Cr";
+                document.getElementById('kpiProfit').innerText = "₹80.2 L";
+                document.getElementById('kpiMargin').innerText = "21.3%";
+            } else {
+                document.getElementById('kpiRevenue').innerText = "₹8.18 Cr";
+                document.getElementById('kpiProfit').innerText = "₹1.72 Cr";
+                document.getElementById('kpiMargin').innerText = "21.0%";
+            }
+        }
+
+        function filterTable() {
+            const searchVal = document.getElementById('tableSearch').value.toLowerCase();
+            const catVal = document.getElementById('categoryFilter').value;
+            const sourceData = categoryData[catVal] || categoryData["all"];
+            const filtered = sourceData.filter(item => 
+                item.category.toLowerCase().includes(searchVal) ||
+                item.priority.toLowerCase().includes(searchVal)
+            );
+            populateTable(filtered);
+        }
+
+        window.onload = function() {
+            initCharts();
+            populateTable(categoryData["all"]);
+        };
+    </script>
+</body>
+</html>
